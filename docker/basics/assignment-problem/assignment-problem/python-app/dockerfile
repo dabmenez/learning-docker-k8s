@@ -1,0 +1,11 @@
+# 1. Use an official Python image as the base
+FROM python:3.9
+
+# 2. Set the working directory
+WORKDIR /app
+
+# 3. Copy the main Python script into the container
+COPY bmi.py .
+
+# 4. Define the default command to run your script
+CMD ["python", "bmi.py"]
