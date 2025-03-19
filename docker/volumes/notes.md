@@ -119,5 +119,3 @@ docker volume prune
 ✅ Secure sensitive data through `.env` files and **Docker secrets**.  
 ✅ Optimize builds using `.dockerignore`.  
 ✅ Clearly differentiate between **ARG (build-time)** and **ENV (runtime)**.
-
-By mastering these concepts, you'll be better equipped to build efficient, secure, and maintainable Dockerized applications.
