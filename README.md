@@ -39,7 +39,3 @@ Explore each directory for code examples, explanatory notes, and resources tailo
 
 This repository follows the [Docker & Kubernetes: The Practical Guide (2025 Edition)](https://www.udemy.com/course/docker-kubernetes-the-practical-guide/) course from Udemy, providing practical examples and notes to complement learning.
 
-## 📝 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
