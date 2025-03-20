@@ -123,3 +123,52 @@ docker run --name cont2 --network my-network my-other-image
 - Embrace Docker’s networking capabilities for multi-container apps.  
 - Remember that `localhost` inside a container does **not** refer to your physical machine.  
 - Use custom networks to enable straightforward, name-based container communication.
+
+## 7. Useful Commands
+
+Below are some useful commands to explore and manage container networking.
+
+### Manage Networks
+```bash
+# List existing networks
+docker network ls
+
+# Create a new user-defined network
+docker network create my-network
+
+# Inspect network details (connected containers, IP addresses, etc.)
+docker network inspect my-network
+
+# Remove a network (works only if no containers are attached to it)
+docker network rm my-network
+```
+
+### Running Containers on a Custom Network
+```bash
+# Run and attach directly to a custom network
+docker run -d --name cont1 --network my-network my-image
+
+# Or connect an already running container to a network
+docker network connect my-network cont1
+```
+
+### Map Ports for External Access (host->container)
+```bash
+# Example: mapping container's port 3000 to port 3000 on the host
+docker run -d --name cont1 -p 3000:3000 --network my-network my-image
+```
+
+### Check Exposed Ports
+```bash
+# Show which ports are mapped
+docker port cont1
+```
+### Other Operations
+
+```bash
+# See container details (including internal IP address)
+docker inspect cont1
+
+# Test connectivity (e.g., using ping, if available in the container)
+docker exec -it cont1 ping cont2
+```
