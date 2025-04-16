@@ -94,15 +94,10 @@ Docker is a **containerization** platform that enables developers to build, pack
 - **Pulling Images**: `docker pull <USERNAME>/<IMAGE>:<TAG>` fetches an image from DockerHub (or another registry).  
 - **Using Shared Images**: Once pulled, you can run others’ images locally without extra setup.
 
----
-
-## 13. Hands-On Practice
-- **Time to Practice**: Complete exercises like building custom Dockerfiles, running containers, stopping & restarting, and pushing images to DockerHub to solidify your skills.
-- **Playground**: Use environments like [Play with Docker](https://labs.play-with-docker.com/) to experiment without installing Docker locally.
 
 ---
 
-## 14. Conclusion
+## 13. Conclusion
 Docker fundamentally reshapes how applications are **developed**, **packaged**, and **deployed**. With **containerization**, you gain a consistent, lightweight, and modular approach to software delivery—whether working on a single developer machine or deploying at scale in the cloud.
 
 **Key Takeaways**:
