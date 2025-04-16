@@ -1,4 +1,4 @@
-# Docker Fundamentals: Expanded Summary
+# Docker Fundamentals: Expanded Summary.
 
 ## 1. What Is Docker?
 Docker is a **containerization** platform that enables developers to build, package, and run applications in lightweight, portable containers. Unlike virtual machines, containers share the host OS kernel but maintain isolated processes, file systems, and network stacks, making them more resource-efficient and faster to start.
