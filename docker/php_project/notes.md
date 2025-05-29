@@ -1,46 +1,69 @@
 
-# 🐳 Dockerizando um Projeto Laravel + PHP
-
-## 🎯 Objetivo do Setup
-
-Queremos rodar uma aplicação Laravel de forma completamente isolada e reproduzível com Docker. O projeto terá múltiplos contêineres, cada um com uma responsabilidade clara:
-
-- **Nginx** como servidor web
-- **PHP-FPM** para processar requisições PHP
-- **MySQL** como banco de dados
-- **Composer** para gerenciamento de dependências
-- **Artisan** e **npm** como utilitários extras
+# 🐳 Dockerizing a Laravel + PHP Project
 
 ---
 
-## 🧪 Criando os Serviços com Docker Compose
+## 🎯 Project Goal
 
-### 🔹 nginx (servidor web)
-- Usa `nginx.dockerfile`
-- Expõe porta `8000:80`
-- Monta `src` como `/var/www/html`
-- Monta `nginx.conf` como `default.conf`
+The goal is to run a Laravel application in a fully containerized, reproducible environment using Docker. This project uses multiple containers, each with a clear responsibility:
 
-### 🔹 php (interpretador)
-- Usa `php.dockerfile`
-- Instala `pdo_mysql` e roda como usuário `laravel`
-
-### 🔹 mysql
-- Usa imagem `mysql:5.7`
-- Recebe envs via `mysql.env`
-
-### 🔹 composer (utilitário)
-- Usa `composer.dockerfile`
-- Comando: `composer --ignore-platform-reqs`
-- Permite instalar o Laravel direto no volume
-
-### 🔹 artisan e npm (utilitários)
-- `artisan`: roda comandos do Laravel
-- `npm`: instala pacotes JS para o frontend
+- **Nginx** as the web server  
+- **PHP-FPM** to process PHP requests  
+- **MySQL** as the database  
+- **Composer** to manage dependencies  
+- **Artisan** and **npm** as utility services
 
 ---
 
-## ⚙️ docker-compose.yaml (Resumo)
+## 🧱 Application Structure
+
+```
+LARAVEL-04-FIXED/
+├── dockerfiles/
+│   ├── composer.dockerfile
+│   ├── nginx.dockerfile
+│   └── php.dockerfile
+├── env/
+│   └── mysql.env
+├── nginx/
+│   └── nginx.conf
+├── src/           # Laravel application source code
+└── docker-compose.yaml
+```
+
+---
+
+## 🧪 Docker Compose Services Breakdown
+
+### 🔹 nginx (Web Server)
+- Uses `nginx.dockerfile`
+- Maps port `8000:80`
+- Mounts `src` as `/var/www/html`
+- Mounts custom `nginx.conf` as `default.conf`
+
+### 🔹 php (PHP-FPM)
+- Uses `php.dockerfile`
+- Installs required extensions
+- Runs as user `laravel`
+
+### 🔹 mysql (Database)
+- Uses official `mysql:5.7` image
+- Loads credentials and configs from `mysql.env`
+
+### 🔹 composer (Utility)
+- Uses `composer.dockerfile`
+- Used to install Laravel via:
+  ```bash
+  docker compose run --rm composer create-project laravel/laravel .
+  ```
+
+### 🔹 artisan and npm (Utilities)
+- `artisan`: Laravel CLI commands (e.g. migrate, tinker)
+- `npm`: Install and build frontend JS assets
+
+---
+
+## ⚙️ `docker-compose.yaml` Summary
 
 ```yaml
 services:
@@ -54,35 +77,36 @@ services:
 
 ---
 
-## 📦 Dockerfiles
+## 📦 Dockerfile Descriptions
 
 ### `php.dockerfile`
-- Usa imagem `php:8.0-fpm-alpine`
-- Instala `pdo`, `pdo_mysql`
-- Cria usuário `laravel`
-- Copia `src` para `/var/www/html`
+- Based on `php:8.0-fpm-alpine`
+- Installs PDO extensions
+- Adds a non-root user `laravel`
+- Copies Laravel source code
 
 ### `nginx.dockerfile`
-- Usa imagem `nginx:stable-alpine`
-- Copia `nginx.conf` como `default.conf`
-- Copia `src` também para servir estáticos
+- Based on `nginx:stable-alpine`
+- Uses a custom `nginx.conf`
+- Copies static files from `src`
 
 ### `composer.dockerfile`
-- Usa `composer:latest`
-- Apenas define `ENTRYPOINT` e monta `src`
+- Based on `composer:latest`
+- Adds user `laravel`
+- Runs composer with `--ignore-platform-reqs`
 
 ---
 
-## 🛠️ Comandos Úteis
+## 🛠️ Common Commands
 
 ```bash
-# Criar projeto Laravel via composer
+# Create a new Laravel project
 docker compose run --rm composer create-project laravel/laravel .
 
-# Rodar o projeto
+# Start the environment
 docker compose up
 
-# Usar utilitários
+# Run Laravel commands
 docker compose run --rm artisan migrate
 docker compose run --rm npm install
 ```
@@ -91,25 +115,23 @@ docker compose run --rm npm install
 
 ## 🔄 COPY vs Bind Mounts
 
-| COPY                      | Bind Mount                        |
-|--------------------------|-----------------------------------|
-| Usa snapshot da build    | Acompanha mudanças em tempo real |
-| Ideal p/ produção        | Ideal p/ desenvolvimento          |
+| COPY (in Dockerfile)        | Bind Mount (in docker-compose)         |
+|----------------------------|----------------------------------------|
+| Snapshot during image build| Syncs live changes from host           |
+| Good for production        | Ideal for development                  |
 
 ---
 
-## 📌 Dicas Finais
+## 📌 Final Tips
 
-- Use volumes nomeados ou `bind mounts` com `:delegated` para performance no Mac/WSL2
-- Prefira múltiplos serviços pequenos e reutilizáveis
-- Dockerize também ferramentas de desenvolvimento (npm, artisan, etc.)
-
----
-
-## 📎 Recursos
-
-- `docker-compose.yaml`: organização limpa e extensível
-- `.env`: variável de ambiente para o MySQL
-- `nginx.conf`: configuração simples e clara para Laravel
+- Use `:delegated` flag on volumes for performance (macOS/WSL2)
+- Split responsibilities into focused containers
+- Dockerize CLI tools like `artisan` and `npm` for consistency
 
 ---
+
+## 📎 Resources
+
+- `docker-compose.yaml`: clean and modular setup
+- `.env`: used for MySQL config
+- `nginx.conf`: basic Laravel config
