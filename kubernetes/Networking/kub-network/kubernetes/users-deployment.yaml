@@ -1,0 +1,35 @@
+# ───────────────────────────────────────────────────────────────
+# DEPLOYMENT: Users Service - Public-Facing API
+# ───────────────────────────────────────────────────────────────
+# This Deployment creates Pods for the users microservice,
+# which acts as the main entry point and calls internal services
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-deployment
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: users  # Label for Service to select these Pods
+  template:
+    metadata:
+      labels:
+        app: users  # Must match selector labels
+    spec:
+      containers:
+        - name: users
+          image: academind/kub-demo-users:latest
+          
+          # ENV VARS: Configuring inter-service communication via DNS
+          # The app uses this to call the internal auth-service
+          # Using Service DNS name instead of IP addresses
+          env:
+            - name: AUTH_ADDRESS
+              # value: "10.99.104.252"  # Hardcoded IP (NOT recommended)
+              
+              # SERVICE DNS: Using Kubernetes Service DNS resolution
+              # Format: <service-name>.<namespace>.svc.cluster.local
+              # In same namespace, just use service name
+              # This is stable and survives Pod restarts
+              value: "auth-service.default"  # auth-service DNS name

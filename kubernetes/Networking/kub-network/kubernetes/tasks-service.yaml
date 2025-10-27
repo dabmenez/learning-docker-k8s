@@ -1,0 +1,17 @@
+# ───────────────────────────────────────────────────────────────
+# SERVICE: Tasks Service (Public in this demo)
+# ───────────────────────────────────────────────────────────────
+# Note: In production, this should likely be ClusterIP since
+# it's an internal service called by the frontend via the users API
+apiVersion: v1
+kind: Service
+metadata:
+  name: tasks-service
+spec:
+  selector:
+    app: tasks  # Selects Pods with label app: tasks
+  type: LoadBalancer  # Public access (for demo purposes)
+  ports:
+    - protocol: TCP
+      port: 8000        # Service port
+      targetPort: 8000  # Container port where tasks app listens

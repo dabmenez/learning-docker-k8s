@@ -1,0 +1,41 @@
+# ───────────────────────────────────────────────────────────────
+# PERSISTENT VOLUME (PV): Cluster-Level Storage Resource
+# ───────────────────────────────────────────────────────────────
+# A PV represents actual storage in the cluster. This is a STATIC provisioned
+# PV backed by hostPath (for single-node demos only, NOT for production)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: host-pv
+spec:
+  # STORAGE CAPACITY: How much space is available
+  capacity: 
+    storage: 1Gi  # 1 gigabyte
+  
+  # VOLUME MODE: Filesystem (or Block for raw block devices)
+  volumeMode: Filesystem
+  
+  # STORAGE CLASS: Groups similar PVs together
+  # PVCs will select PVs by matching StorageClassName
+  storageClassName: standard
+  
+  # ACCESS MODES: How the volume can be mounted
+  # ReadWriteOnce: Can be mounted read-write by a single node
+  # ReadWriteMany: Can be mounted read-write by many nodes (requires network storage)
+  # ReadOnlyMany: Can be mounted read-only by many nodes
+  accessModes:
+    - ReadWriteOnce
+  
+  # HOST PATH: Mounts a directory from the node's filesystem
+  # WARNING: This ties the PV to a specific node, not portable
+  # Use ONLY for single-node environments or local testing
+  # For production, use cloud storage (EBS, GCE Persistent Disk) or network storage (NFS)
+  hostPath:
+    path: /data                          # Directory on the node
+    type: DirectoryOrCreate               # Create if doesn't exist
+  
+  # RECLAIM POLICY: What happens to PV when PVC is deleted
+  # Retain: Keeps the volume (manual cleanup required)
+  # Recycle: Deletes data (deprecated)
+  # Delete: Deletes the PV (cloud providers use this)
+  persistentVolumeReclaimPolicy: Retain

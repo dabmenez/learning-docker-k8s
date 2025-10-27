@@ -1,0 +1,29 @@
+# ───────────────────────────────────────────────────────────────
+# PERSISTENT VOLUME CLAIM (PVC): Requesting Storage from Cluster
+# ───────────────────────────────────────────────────────────────
+# A PVC is a REQUEST for storage. It gets bound to a PV that matches
+# its criteria (storage size, access modes, storage class)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: host-pvc  # This name is referenced in the Deployment
+spec:
+  # VOLUME NAME: Optional, binds to a SPECIFIC PV
+  # If omitted, Kubernetes will find ANY matching PV
+  volumeName: host-pv  # Binding to the host-pv created above
+  
+  # ACCESS MODES: Must match the PV's access modes
+  # ReadWriteOnce: Can only be used by one Pod at a time
+  accessModes:
+    - ReadWriteOnce
+  
+  # STORAGE CLASS: Must match the PV's storageClassName
+  storageClassName: standard
+  
+  # RESOURCES: How much storage you need
+  resources:
+    requests: 
+      storage: 1Gi  # Requesting 1 gigabyte
+  
+  # After this is created and bound to a PV, you can mount it
+  # in a Pod by referencing this PVC name in a volumeMount

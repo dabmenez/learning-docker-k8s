@@ -1,0 +1,46 @@
+# ───────────────────────────────────────────────────────────────
+# SERVICE: Internal Auth Service (ClusterIP Only)
+# ───────────────────────────────────────────────────────────────
+# This is an INTERNAL service - NOT exposed to the Internet
+# Only accessible within the EKS cluster via DNS name
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service  # DNS name: auth-service.default:3000
+spec:
+  selector:
+    app: auth
+  type: ClusterIP  # Internal cluster access only
+  ports:
+    - protocol: TCP
+      port: 3000        # Service port
+      targetPort: 3000  # Container port where auth app listens
+---
+# ───────────────────────────────────────────────────────────────
+# DEPLOYMENT: Auth Service - Token Generation & Verification
+# ───────────────────────────────────────────────────────────────
+# Handles JWT token creation and validation for authentication
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+        - name: auth-api
+          image: academind/kub-dep-auth:latest
+          
+          # SECURITY: Token signing key
+          # In production, use Kubernetes Secret instead of plain value
+          # This should NEVER be hardcoded or checked into version control
+          env:
+            - name: TOKEN_KEY
+              value: 'shouldbeverysecure'  # Use Secrets in production!

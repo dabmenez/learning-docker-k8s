@@ -1,0 +1,17 @@
+# ───────────────────────────────────────────────────────────────
+# SERVICE: Internal Auth Service (Cluster-Only)
+# ───────────────────────────────────────────────────────────────
+# This is a ClusterIP Service - ONLY accessible within the cluster
+# NOT exposed to the Internet for security
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service  # DNS name: auth-service.default
+spec:
+  selector:
+    app: auth  # Selects Pods with label app: auth
+  type: ClusterIP  # Internal-only access (default, most secure for internal services)
+  ports:
+    - protocol: TCP
+      port: 80        # Service port
+      targetPort: 80  # Container port where auth app listens

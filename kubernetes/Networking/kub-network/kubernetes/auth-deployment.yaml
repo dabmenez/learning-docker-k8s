@@ -1,0 +1,23 @@
+# ───────────────────────────────────────────────────────────────
+# DEPLOYMENT: Auth Service - Internal Authentication
+# ───────────────────────────────────────────────────────────────
+# This is an INTERNAL microservice for authentication.
+# It should NOT be exposed to the Internet - only accessible
+# within the cluster via ClusterIP Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-deployment
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: auth  # Label for Service to select these Pods
+  template:
+    metadata:
+      labels:
+        app: auth  # Must match selector labels
+    spec:
+      containers:
+        - name: auth
+          image: academind/kub-demo-auth:latest

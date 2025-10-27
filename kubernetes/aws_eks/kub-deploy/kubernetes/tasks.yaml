@@ -1,0 +1,51 @@
+# ───────────────────────────────────────────────────────────────
+# SERVICE: Tasks API Exposure
+# ───────────────────────────────────────────────────────────────
+# Creates an AWS ELB for public access to tasks endpoint
+apiVersion: v1
+kind: Service
+metadata:
+  name: tasks-service
+spec:
+  selector:
+    app: task  # Note: label is 'task' not 'tasks'
+  type: LoadBalancer  # Creates external AWS ELB
+  ports:
+    - protocol: TCP
+      port: 80              # Service port
+      targetPort: 3000      # Container port
+---
+# ───────────────────────────────────────────────────────────────
+# DEPLOYMENT: Tasks Microservice with Authentication
+# ───────────────────────────────────────────────────────────────
+# This service:
+# - Authenticates requests via auth-service
+# - Stores tasks in MongoDB Atlas
+# - Shows inter-service communication pattern
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tasks-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: task  # Must match Service selector
+  template:
+    metadata:
+      labels:
+        app: task  # Label for Service to select this Pod
+    spec:
+      containers:
+        - name: tasks-api
+          image: academind/kub-dep-tasks
+          env:
+            # DATABASE: External MongoDB Atlas
+            # SECURITY WARNING: In production, use Kubernetes Secrets!
+            - name: MONGODB_CONNECTION_URI
+              value: 'mongodb+srv://maximilian:wk4nFupsbntPbB3l@cluster0.ntrwp.mongodb.net/users?retryWrites=true&w=majority'
+            
+            # AUTH SERVICE: DNS name for token verification
+            # Used by middleware to validate JWT tokens
+            - name: AUTH_API_ADDRESS
+              value: 'auth-service.default:3000'

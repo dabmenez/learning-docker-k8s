@@ -1,0 +1,30 @@
+# ───────────────────────────────────────────────────────────────
+# SERVICE: Exposing and Load Balancing Pods
+# ───────────────────────────────────────────────────────────────
+# A Service provides a stable IP and load balancing for Pods
+# While Pods can come and go, the Service maintains a "fixed address"
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  labels:
+    group: example
+spec:
+  # SELECTOR: Defines WHICH Pods this Service will load balance
+  # IMPORTANT: Must match the Pod labels from the Deployment
+  selector: 
+    app: second-app
+  
+  # PORTS: Port mapping
+  ports:
+    - protocol: 'TCP'
+      port: 80              # SERVICE port (external access)
+      targetPort: 8080      # CONTAINER port (where the app listens)
+  
+  # TYPE: Defines how the Service is exposed
+  # LoadBalancer: Creates an external Load Balancer (cloud) that exposes the Service
+  # - ClusterIP: Internal cluster access only (default)
+  # - NodePort: Exposes on each node at a fixed port (30000-32767)
+  # - LoadBalancer: External load balancer (AWS ELB, GCP LB, etc)
+  # - ExternalName: Returns a CNAME (DNS)
+  type: LoadBalancer

@@ -1,0 +1,49 @@
+# ───────────────────────────────────────────────────────────────
+# MASTER FILE: All configurations in one place
+# ───────────────────────────────────────────────────────────────
+# This file combines Service + Deployment for easier deployment
+# Use separate OR combined - depends on your organizational preference
+
+# ───────────────────────────────────────────────────────────────
+# SERVICE
+# ───────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  selector: 
+    app: second-app
+  ports:
+    - protocol: 'TCP'
+      port: 80              # Service port
+      targetPort: 8080      # Container port
+  type: LoadBalancer
+
+# ───────────────────────────────────────────────────────────────
+# Resource separator (required when multiple resources in the same file)
+# ───────────────────────────────────────────────────────────────
+---
+
+# ───────────────────────────────────────────────────────────────
+# DEPLOYMENT
+# ───────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: second-app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: second-app
+      tier: backend
+  template:
+    metadata: 
+      labels:
+        app: second-app
+        tier: backend
+    spec: 
+      containers:
+        - name: second-node
+          image: academind/kub-first-app:2

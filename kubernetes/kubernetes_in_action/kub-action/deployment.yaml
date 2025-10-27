@@ -1,0 +1,55 @@
+# ───────────────────────────────────────────────────────────────
+# DEPLOYMENT: Defining the Desired State of Pods
+# ───────────────────────────────────────────────────────────────
+# A Deployment ensures the desired number of Pods is always running
+# and executes automatic rollouts when we make updates
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: second-app-deployment
+  # Labels help organize and filter resources
+  labels:
+    group: example
+spec:
+  # Number of replicas (copies) of Pods we want to run
+  replicas: 1
+  
+  # SELECTOR: Defines WHICH pods this Deployment will manage
+  # The labels here MUST match the labels in the template below
+  selector:
+    matchLabels:
+      app: second-app
+      tier: backend
+    # matchExpressions: Alternative selection method (more powerful)
+    # Allows using operators like NotIn, In, DoesNotExist
+    #   - {key: app, operator: NotIn, values: [second-app, first-app]}
+
+  # TEMPLATE: Defines HOW the Pods will be created
+  template:
+    metadata: 
+      # Labels are CRITICAL: they identify Pods and allow Services to find them
+      labels:
+        app: second-app      # Application name
+        tier: backend        # Layer (frontend/backend/database)
+    
+    # POD SPEC: defines the containers and configurations
+    spec: 
+      containers:
+        - name: second-node           # Container name inside the Pod
+          image: academind/kub-first-app:2  # Docker image
+          imagePullPolicy: Always    # Always pull the latest version
+          
+          # LIVENESS PROBE: Checks if the app is alive
+          # If it fails 3 times (default failureThreshold), the container is restarted
+          livenessProbe: 
+            httpGet:
+              path: /                # Health check endpoint
+              port: 8080             # Container port
+            periodSeconds: 10        # Check every 10 seconds
+            initialDelaySeconds: 5   # Wait 5 seconds before first check
+            # Note: failureThreshold is 3 by default
+        
+        # You can add multiple containers in the same Pod
+        # (useful for sidecars: logging, proxy, etc)
+        # - name: ...
+        #   image: ...

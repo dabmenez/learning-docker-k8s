@@ -1,0 +1,35 @@
+# ───────────────────────────────────────────────────────────────
+# DEPLOYMENT: Tasks Service - Internal Task Management
+# ───────────────────────────────────────────────────────────────
+# This is an INTERNAL microservice for task management.
+# It requires authentication via the auth-service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tasks-deployment
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: tasks  # Label for Service to select these Pods
+  template:
+    metadata:
+      labels:
+        app: tasks  # Must match selector labels
+    spec:
+      containers:
+        - name: tasks
+          image: academind/kub-demo-tasks:latest
+          
+          # ENV VARS: Configuration for the tasks service
+          env:
+            - name: AUTH_ADDRESS
+              # value: "10.99.104.252"  # Hardcoded IP (NOT recommended)
+              
+              # SERVICE DNS: Points to auth-service for token verification
+              # Uses DNS name for internal service-to-service communication
+              value: "auth-service.default"  # auth-service DNS
+            
+            # LOCAL CONFIG: Directory for storing tasks
+            - name: TASKS_FOLDER
+              value: tasks  # Folder name (could come from ConfigMap)

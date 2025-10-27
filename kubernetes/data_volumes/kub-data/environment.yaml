@@ -1,0 +1,17 @@
+# ───────────────────────────────────────────────────────────────
+# CONFIGMAP: Externalizing Configuration
+# ───────────────────────────────────────────────────────────────
+# ConfigMaps separate configuration from application code,
+# allowing you to change config without rebuilding images
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: data-store-env  # Name that will be referenced in the Deployment
+data:
+  # Configuration key-value pairs
+  folder: 'story'  # Used by the app to determine data directory
+  
+  # You can add more configuration keys here
+  # Example: 
+  # log_level: 'info'
+  # api_endpoint: 'https://api.example.com'

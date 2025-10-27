@@ -1,0 +1,54 @@
+# ───────────────────────────────────────────────────────────────
+# DEPLOYMENT: Demonstrating Persistent Storage with PVC
+# ───────────────────────────────────────────────────────────────
+# This Deployment shows how to mount persistent volumes in Pods
+# using PersistentVolumeClaims (PVC) for data that must survive
+# Pod restarts and rescheduling
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: story-deployment
+spec: 
+  replicas: 2
+  selector:
+    matchLabels:
+      app: story
+  template:
+    metadata:
+      labels:
+        app: story
+    spec:
+      containers:
+        - name: story
+          image: academind/kub-data-demo:2
+          
+          # ENV VARS: Injecting configuration from ConfigMap
+          # This is the declarative way to parameterize containers
+          # without hardcoding values in the Deployment
+          env:
+            - name: STORY_FOLDER
+              # value: 'story'  # Hardcoded alternative (not recommended)
+              
+              # valueFrom: References a ConfigMap key to decouple config from code
+              valueFrom: 
+                configMapKeyRef:
+                  name: data-store-env  # The ConfigMap name
+                  key: folder            # The key to read from ConfigMap
+          
+          # VOLUME MOUNTS: Mount volumes into containers
+          # Specifies WHERE in the container the volume will be accessible
+          volumeMounts:
+            - mountPath: /app/story           # Path inside container
+              name: story-volume               # Must match volume name below
+      
+      # VOLUMES: Define volumes at Pod level
+      # Declares what storage to attach to this Pod
+      volumes:
+        - name: story-volume
+          # emptyDir: {}  # Temporary volume (lost when Pod is deleted)
+          
+          # PERSISTENT VOLUME CLAIM: Request storage from the cluster
+          # The PVC must be created separately and will bind to a PV
+          # This provides durable storage that survives Pod restarts
+          persistentVolumeClaim:
+            claimName: host-pvc  # Name of the PVC created separately

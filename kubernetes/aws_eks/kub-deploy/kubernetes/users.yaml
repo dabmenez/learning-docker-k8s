@@ -1,0 +1,109 @@
+# ───────────────────────────────────────────────────────────────
+# STORAGE CLASS: EFS CSI Driver for AWS EKS
+# ───────────────────────────────────────────────────────────────
+# Defines dynamic provisioning for EFS volumes
+# When a PVC requests storage, this StorageClass tells Kubernetes
+# to use the EFS CSI driver to provision it automatically
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: efs-sc
+provisioner: efs.csi.aws.com  # Uses AWS EFS CSI driver
+---
+# ───────────────────────────────────────────────────────────────
+# PERSISTENT VOLUME: Static PV for EFS
+# ───────────────────────────────────────────────────────────────
+# This is a STATIC PV that points to an existing EFS filesystem
+# In a real production setup, you'd use dynamic provisioning via PVC
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: efs-pv
+spec:
+  capacity: 
+    storage: 5Gi  # EFS doesn't enforce this, it's informational
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany  # Multiple Pods can mount read-write simultaneously
+  storageClassName: efs-sc
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: fs-59d14521  # Your EFS File System ID from AWS
+---
+# ───────────────────────────────────────────────────────────────
+# PERSISTENT VOLUME CLAIM: Request EFS Storage
+# ───────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: efs-pvc
+spec:
+  accessModes:
+    - ReadWriteMany  # MUST match PV access mode
+  storageClassName: efs-sc
+  resources:
+    requests:
+      storage: 5Gi  # Size request (informational for EFS)
+---
+# ───────────────────────────────────────────────────────────────
+# SERVICE: Exposing Users API with LoadBalancer
+# ───────────────────────────────────────────────────────────────
+# This creates an AWS ELB (Elastic Load Balancer) for public access
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-service
+spec:
+  selector:
+    app: users  # Selects Pods with label app: users
+  type: LoadBalancer  # Creates AWS ELB with public IP
+  ports:
+    - protocol: TCP
+      port: 80              # Service port
+      targetPort: 3000       # Container port
+---
+# ───────────────────────────────────────────────────────────────
+# DEPLOYMENT: Users Microservice with EFS Storage
+# ───────────────────────────────────────────────────────────────
+# This Deployment demonstrates:
+# 1. Inter-service communication via DNS (auth-service)
+# 2. Persistent storage using EFS (shared across Pods)
+# 3. MongoDB integration
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-deployment
+spec:
+  replicas: 2  # Multiple replicas can share the same EFS volume
+  selector:
+    matchLabels:
+      app: users
+  template:
+    metadata:
+      labels:
+        app: users
+    spec:
+      containers:
+        - name: users-api
+          image: academind/kub-dep-users:latest
+          env:
+            # DATABASE: External MongoDB Atlas connection
+            # In production, use Kubernetes Secret instead of hardcoding
+            - name: MONGODB_CONNECTION_URI
+              value: 'mongodb+srv://maximilian:wk4nFupsbntPbB3l@cluster0.ntrwp.mongodb.net/users?retryWrites=true&w=majority'
+            
+            # AUTH SERVICE: DNS name for internal auth service
+            # Uses Service DNS (auth-service.default:3000)
+            - name: AUTH_API_ADDRESS
+              value: 'auth-service.default:3000'
+          
+          # VOLUME MOUNTS: Mount EFS volume for persistent storage
+          volumeMounts:
+            - name: efs-vol
+              mountPath: /app/users  # Where EFS is mounted in container
+      
+      # VOLUMES: Reference the EFS PVC
+      volumes:
+        - name: efs-vol
+          persistentVolumeClaim: 
+            claimName: efs-pvc  # The PVC we created above
